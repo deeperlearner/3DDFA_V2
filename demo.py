@@ -57,7 +57,11 @@ def main(args):
     old_suffix = get_suffix(args.img_fp)
     new_suffix = f'.{args.opt}' if args.opt in ('ply', 'obj') else '.jpg'
 
-    wfp = f'examples/results/{args.img_fp.split("/")[-1].replace(old_suffix, "")}_{args.opt}' + new_suffix
+    output_path = args.output_path
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    file_name = f'{args.img_fp.split("/")[-1].replace(old_suffix, "")}_{args.opt}' + new_suffix
+    wfp = os.path.join(output_path, file_name)
 
     ver_lst = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=dense_flag)
 
@@ -69,7 +73,7 @@ def main(args):
         render(img, ver_lst, tddfa.tri, alpha=0.6, show_flag=args.show_flag, wfp=wfp)
     elif args.opt == 'depth':
         # if `with_bf_flag` is False, the background is black
-        depth(img, ver_lst, tddfa.tri, show_flag=args.show_flag, wfp=wfp, with_bg_flag=True)
+        depth(img, ver_lst, tddfa.tri, show_flag=args.show_flag, wfp=wfp, with_bg_flag=False)
     elif args.opt == 'pncc':
         pncc(img, ver_lst, tddfa.tri, show_flag=args.show_flag, wfp=wfp, with_bg_flag=True)
     elif args.opt == 'uv_tex':
@@ -93,6 +97,7 @@ if __name__ == '__main__':
                         choices=['2d_sparse', '2d_dense', '3d', 'depth', 'pncc', 'uv_tex', 'pose', 'ply', 'obj'])
     parser.add_argument('--show_flag', type=str2bool, default='true', help='whether to show the visualization result')
     parser.add_argument('--onnx', action='store_true', default=False)
+    parser.add_argument('--output_path', type=str, default='examples/results')
 
     args = parser.parse_args()
     main(args)
